@@ -1,4 +1,6 @@
-﻿public class ConsoleUserInteractor : IUserInteractor
+﻿namespace StartWars.UserInteraction;
+
+public class ConsoleUserInteractor : IUserInteractor
 {
     public string? ReadFromUser()
     {

@@ -1,4 +1,6 @@
-﻿public class ApiDataReader : IApiDataReader
+﻿namespace StartWars;
+
+public class ApiDataReader : IApiDataReader
 {
     public async Task<string> Read(string baseAddress, string requestUrl)
     {

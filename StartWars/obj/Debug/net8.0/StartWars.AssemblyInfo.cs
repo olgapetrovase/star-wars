@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StartWars")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b12026217b24562aba5bf71e243b3790cf8aa7d8")]
 [assembly: System.Reflection.AssemblyProductAttribute("StartWars")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StartWars")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

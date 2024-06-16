@@ -8,13 +8,16 @@ try
     await new StartWarsPlanetsApp(
         new PlanetsFromApiReader(
             new ApiDataReader(),
-            new MockStarWarsApiDataReader()),
-        new PlanetsStatisticsAnalyzer())
+            new MockStarWarsApiDataReader(),
+            new ConsoleUserInteractor()),
+        new PlanetsStatisticsAnalyzer(
+            new PlanetsStatsUserInteractor(
+                new ConsoleUserInteractor())))
         .Run();
 }
 catch (Exception ex)
 {
-    Console.WriteLine("An error occured. " +
+    new ConsoleUserInteractor().ShowMessage("An error occured. " +
         "Exception message: " + ex.Message);
 }
 
@@ -52,12 +55,15 @@ public class PlanetsFromApiReader : IPlanetsReader
 {
     private readonly IApiDataReader _apiDataReader;
     private readonly IApiDataReader _mockApiDataReader;
+    private readonly IUserInteractor _userInteractor;
     public PlanetsFromApiReader(
-        IApiDataReader apiDataReader, 
-        IApiDataReader mockApiDataReader)
+        IApiDataReader apiDataReader,
+        IApiDataReader mockApiDataReader,
+        IUserInteractor userInteractor)
     {
         _apiDataReader = apiDataReader;
         _mockApiDataReader = mockApiDataReader;
+        _userInteractor = userInteractor;
     }
 
     public async Task<IEnumerable<Planet>> Read()
@@ -71,7 +77,7 @@ public class PlanetsFromApiReader : IPlanetsReader
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine("API request was unsuccessful. " +
+            _userInteractor.ShowMessage("API request was unsuccessful. " +
                 "Switching to mock data. " +
                 "Exception message: " + ex.Message);
         }
@@ -92,13 +98,6 @@ public class PlanetsFromApiReader : IPlanetsReader
 
         return root.results.Select(
             planetDto => (Planet)planetDto);
-
-        //foreach (var planetDto in root.results)
-        //{
-        //    Planet planet = (Planet)planetDto;
-        //    planets.Add(planet);
-        //}
-        //return planets;
     }
 }
 
@@ -109,6 +108,12 @@ public interface IPlanetsStatisticsAnalyzer
 
 public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
 {
+    private readonly IPlanetsStatsUserInteractor _planetsStatsUserInteractor;
+
+    public PlanetsStatisticsAnalyzer(IPlanetsStatsUserInteractor planetsStatsUserInteractor)
+    {
+        _planetsStatsUserInteractor = planetsStatsUserInteractor;
+    }
     public void Analyze(IEnumerable<Planet> planets)
     {
         var propertyNamesToSelectorMapping =
@@ -119,18 +124,13 @@ public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
             ["surface water"] = planet => planet.SurfaceWater,
         };
 
-        Console.WriteLine();
-        Console.WriteLine("The statistics of which property would you " +
-            "like to see?");
-        Console.WriteLine(string.Join(
-            Environment.NewLine, propertyNamesToSelectorMapping.Keys));
-
-        var userChoice = Console.ReadLine();
+        var userChoice = _planetsStatsUserInteractor.ChooseStatisticsToBeShown(
+            propertyNamesToSelectorMapping.Keys);
 
         if (userChoice is null ||
             !propertyNamesToSelectorMapping.ContainsKey(userChoice))
         {
-            Console.WriteLine("Invalid choice.");
+            _planetsStatsUserInteractor.ShowMessage("Invalid choice.");
         }
         else
         {
@@ -141,7 +141,7 @@ public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
         }
     }
 
-    private static void ShowStatistic(IEnumerable<Planet> planets,
+    private void ShowStatistic(IEnumerable<Planet> planets,
         string propertyName,
         Func<Planet, int?> propertySelector)
     {
@@ -158,13 +158,13 @@ public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
             propertyName);
     }
 
-    private static void ShowStatistic(
+    private void ShowStatistic(
         string descriptor,
         Planet selectedPlanet,
         Func<Planet, int?> propertySelector,
         string propertyName)
     {
-        Console.WriteLine($"{descriptor} {propertyName} is: " +
+        _planetsStatsUserInteractor.ShowMessage($"{descriptor} {propertyName} is: " +
             $"{propertySelector(selectedPlanet)}" +
             $"(planet: {selectedPlanet.Name})");
     }
@@ -213,21 +213,38 @@ public static class StringExtensions
     }
 }
 
-public interface IUserInteractor
+public class PlanetsStatsUserInteractor : IPlanetsStatsUserInteractor
 {
-    void ShowMessage(string message);
-    string? ReadFromUser();
-}
-
-public class ConsoleUserInteractor : IUserInteractor
-{
-    public string? ReadFromUser()
+    private readonly IUserInteractor _userInteractor;
+    public PlanetsStatsUserInteractor(IUserInteractor userInteractor)
     {
-        return Console.ReadLine();
+        _userInteractor = userInteractor;
+    }
+    public string? ChooseStatisticsToBeShown(
+        IEnumerable<string> propertiesThatCanBeChosen)
+    {
+        _userInteractor.ShowMessage(Environment.NewLine);
+        _userInteractor.ShowMessage(
+            "The statistics of which property would you " +
+            "like to see?");
+        _userInteractor.ShowMessage(
+            string.Join(
+                Environment.NewLine,
+                propertiesThatCanBeChosen));
+
+        return _userInteractor.ReadFromUser();
+    }
+
+    public void Show(IEnumerable<Planet> planets)
+    {
+        foreach (var planet in planets)
+        {
+            Console.WriteLine(planet);
+        }
     }
 
     public void ShowMessage(string message)
     {
-        Console.WriteLine(message);
+        _userInteractor.ShowMessage(message);
     }
 }

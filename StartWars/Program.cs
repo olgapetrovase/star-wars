@@ -13,7 +13,8 @@ try
             new ConsoleUserInteractor()),
         new PlanetsStatisticsAnalyzer(
             new PlanetsStatsUserInteractor(
-                new ConsoleUserInteractor())))
+                new ConsoleUserInteractor())),
+        new PlanetsStatsUserInteractor(new ConsoleUserInteractor()))
         .Run();
 }
 catch (Exception ex)

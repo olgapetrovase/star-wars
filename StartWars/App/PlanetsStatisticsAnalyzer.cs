@@ -14,7 +14,7 @@ public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
     public void Analyze(IEnumerable<Planet> planets)
     {
         var propertyNamesToSelectorMapping =
-        new Dictionary<string, Func<Planet, int?>>
+        new Dictionary<string, Func<Planet, long?>>
         {
             ["population"] = planet => planet.Population,
             ["diameter"] = planet => planet.Diameter,
@@ -40,7 +40,7 @@ public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
 
     private void ShowStatistic(IEnumerable<Planet> planets,
         string propertyName,
-        Func<Planet, int?> propertySelector)
+        Func<Planet, long?> propertySelector)
     {
         ShowStatistic(
             "Max",
@@ -58,7 +58,7 @@ public class PlanetsStatisticsAnalyzer : IPlanetsStatisticsAnalyzer
     private void ShowStatistic(
         string descriptor,
         Planet selectedPlanet,
-        Func<Planet, int?> propertySelector,
+        Func<Planet, long?> propertySelector,
         string propertyName)
     {
         _planetsStatsUserInteractor.ShowMessage($"{descriptor} {propertyName} is: " +
